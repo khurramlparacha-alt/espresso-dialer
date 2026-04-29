@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Espresso Dialer</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #1a0f0a;
+      color: #e8d5c0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .card {
+      background: #2b1a12;
+      border: 1px solid #4a2e1e;
+      border-radius: 16px;
+      padding: 36px;
+      max-width: 560px;
+      width: 100%;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .header .icon { font-size: 2.4rem; margin-bottom: 8px; }
+
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #f5c97a;
+      letter-spacing: -0.3px;
+    }
+
+    .subtitle {
+      font-size: 0.82rem;
+      color: #8a6a52;
+      margin-top: 4px;
+    }
+
+    .section-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #8a6a52;
+      margin-bottom: 10px;
+    }
+
+    .field-group {
+      margin-bottom: 22px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.88rem;
+      color: #c4a882;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    label span.hint {
+      font-weight: 400;
+      color: #6a4e3a;
+      font-size: 0.78rem;
+      margin-left: 4px;
+    }
+
+    input[type="number"], select {
+      width: 100%;
+      background: #1a0f0a;
+      border: 1px solid #4a2e1e;
+      border-radius: 8px;
+      color: #e8d5c0;
+      font-size: 0.95rem;
+      padding: 10px 14px;
+      outline: none;
+      transition: border-color 0.2s;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    input[type="number"]:focus, select:focus {
+      border-color: #c47f3a;
+    }
+
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238a6a52' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .taste-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .taste-btn {
+      background: #1a0f0a;
+      border: 1px solid #4a2e1e;
+      border-radius: 8px;
+      color: #8a6a52;
+      font-size: 0.82rem;
+      padding: 8px 4px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s;
+      user-select: none;
+    }
+
+    .taste-btn:hover { border-color: #8a4e2a; color: #c4a882; }
+    .taste-btn.selected {
+      background: #3d1e0e;
+      border-color: #c47f3a;
+      color: #f5c97a;
+      font-weight: 600;
+    }
+
+    .crema-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .crema-btn {
+      background: #1a0f0a;
+      border: 1px solid #4a2e1e;
+      border-radius: 8px;
+      color: #8a6a52;
+      font-size: 0.78rem;
+      padding: 8px 4px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s;
+      user-select: none;
+    }
+
+    .crema-btn:hover { border-color: #8a4e2a; color: #c4a882; }
+    .crema-btn.selected {
+      background: #3d1e0e;
+      border-color: #c47f3a;
+      color: #f5c97a;
+      font-weight: 600;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid #3a2010;
+      margin: 28px 0;
+    }
+
+    .analyze-btn {
+      width: 100%;
+      background: #c47f3a;
+      color: #1a0f0a;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 700;
+      padding: 14px;
+      cursor: pointer;
+      letter-spacing: 0.01em;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .analyze-btn:hover { background: #d4903a; }
+    .analyze-btn:active { transform: scale(0.98); }
+
+    #result {
+      margin-top: 28px;
+      display: none;
+    }
+
+    .result-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .score-badge {
+      background: #1a0f0a;
+      border: 2px solid #c47f3a;
+      border-radius: 50%;
+      width: 52px;
+      height: 52px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .score-badge .score-num {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #f5c97a;
+      line-height: 1;
+    }
+
+    .score-badge .score-label {
+      font-size: 0.55rem;
+      color: #8a6a52;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .verdict {
+      flex: 1;
+    }
+
+    .verdict-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #f5c97a;
+    }
+
+    .verdict-sub {
+      font-size: 0.8rem;
+      color: #8a6a52;
+      margin-top: 2px;
+    }
+
+    .recommendations {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .rec-card {
+      background: #1a0f0a;
+      border-left: 3px solid #c47f3a;
+      border-radius: 0 8px 8px 0;
+      padding: 12px 14px;
+    }
+
+    .rec-card.good { border-left-color: #4caf72; }
+    .rec-card.warning { border-left-color: #e8a040; }
+    .rec-card.bad { border-left-color: #e06060; }
+
+    .rec-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: #8a6a52;
+      margin-bottom: 4px;
+    }
+
+    .rec-card.good .rec-title { color: #4caf72; }
+    .rec-card.warning .rec-title { color: #e8a040; }
+    .rec-card.bad .rec-title { color: #e06060; }
+
+    .rec-body {
+      font-size: 0.88rem;
+      color: #c4a882;
+      line-height: 1.5;
+    }
+
+    .rec-body strong { color: #f5c97a; font-weight: 600; }
+
+    .target-info {
+      margin-top: 16px;
+      background: #1a0f0a;
+      border: 1px dashed #3a2010;
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 0.78rem;
+      color: #6a4e3a;
+      line-height: 1.6;
+    }
+
+    .target-info strong { color: #8a6a52; }
+
+    .ai-coaching {
+      margin-top: 16px;
+      background: linear-gradient(135deg, #1f1008 0%, #1a0f0a 100%);
+      border: 1px solid #5a3520;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .ai-coaching-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-bottom: 1px solid #3a1e0e;
+      background: #2a1208;
+    }
+
+    .ai-coaching-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #c47f3a;
+    }
+
+    .ai-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #c47f3a;
+      flex-shrink: 0;
+    }
+
+    .ai-dot.pulsing {
+      animation: pulse 1.2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.8); }
+    }
+
+    .ai-coaching-body {
+      padding: 14px;
+      font-size: 0.88rem;
+      color: #c4a882;
+      line-height: 1.65;
+      min-height: 48px;
+    }
+
+    .ai-coaching-body strong { color: #f5c97a; font-weight: 600; }
+
+    .ai-thinking {
+      color: #5a3a28;
+      font-style: italic;
+      font-size: 0.82rem;
+    }
+
+    .cursor-blink {
+      display: inline-block;
+      width: 2px;
+      height: 0.9em;
+      background: #c47f3a;
+      margin-left: 1px;
+      vertical-align: text-bottom;
+      animation: blink 0.8s step-end infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+
+    .coach-setup {
+      background: #1f1008;
+      border: 1px solid #3a1e0e;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .coach-setup-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 11px 14px;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s;
+    }
+
+    .coach-setup-header:hover { background: #261208; }
+
+    .coach-toggle-icon {
+      color: #5a3a28;
+      font-size: 0.75rem;
+      transition: transform 0.2s;
+    }
+
+    .coach-setup-body {
+      padding: 0 14px;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease, padding 0.3s ease;
+    }
+
+    .coach-setup-body.open {
+      max-height: 300px;
+      padding: 0 14px 14px;
+    }
+
+    .coach-desc {
+      font-size: 0.82rem;
+      color: #8a6a52;
+      line-height: 1.6;
+      margin-bottom: 8px;
+      border-top: 1px solid #2a1208;
+      padding-top: 12px;
+    }
+
+    .coach-cost {
+      font-size: 0.75rem;
+      color: #5a3a28;
+      margin-bottom: 10px;
+    }
+
+    .key-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .key-row input {
+      flex: 1;
+      background: #1a0f0a;
+      border: 1px solid #4a2e1e;
+      border-radius: 8px;
+      color: #e8d5c0;
+      font-size: 0.82rem;
+      font-family: 'Courier New', monospace;
+      padding: 9px 12px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .key-row input:focus { border-color: #c47f3a; }
+
+    .show-key-btn {
+      background: #2b1a12;
+      border: 1px solid #4a2e1e;
+      border-radius: 8px;
+      color: #8a6a52;
+      font-size: 0.78rem;
+      padding: 9px 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .show-key-btn:hover { border-color: #c47f3a; color: #c4a882; }
+
+    .coach-get-key {
+      font-size: 0.72rem;
+      color: #4a2e1e;
+      line-height: 1.5;
+    }
+
+    .coach-get-key a { color: #7a5030; text-decoration: underline; }
+    .coach-get-key a:hover { color: #c47f3a; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <div class="icon">☕</div>
+      <h1>Espresso Dialer</h1>
+      <div class="subtitle">Double shot · 36g yield · Breville</div>
+    </div>
+
+    <div class="section-label">Shot Parameters</div>
+
+    <div class="field-group">
+      <label>Shot time <span class="hint">(seconds to reach 36g)</span></label>
+      <input type="number" id="shotTime" min="5" max="90" placeholder="e.g. 28" />
+    </div>
+
+    <div class="row">
+      <div class="field-group">
+        <label>Grind size <span class="hint">(1–16)</span></label>
+        <input type="number" id="grindSize" min="1" max="16" placeholder="e.g. 8" />
+      </div>
+      <div class="field-group">
+        <label>Burr setting <span class="hint">(1–5)</span></label>
+        <input type="number" id="burrSetting" min="1" max="5" placeholder="e.g. 3" />
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <div class="section-label">Taste Profile</div>
+    <div class="field-group">
+      <label>How does it taste?</label>
+      <div class="taste-grid" id="tasteGrid">
+        <div class="taste-btn" data-value="sour">Sour / Acidic</div>
+        <div class="taste-btn" data-value="salty">Salty</div>
+        <div class="taste-btn" data-value="weak">Weak / Watery</div>
+        <div class="taste-btn" data-value="balanced">Balanced ✓</div>
+        <div class="taste-btn" data-value="harsh">Harsh / Astringent</div>
+        <div class="taste-btn" data-value="bitter">Bitter</div>
+      </div>
+    </div>
+
+    <div class="field-group" style="margin-top:18px;">
+      <label>Crema</label>
+      <div class="crema-grid" id="cremaGrid">
+        <div class="crema-btn" data-value="none">None</div>
+        <div class="crema-btn" data-value="thin">Thin / Pale</div>
+        <div class="crema-btn" data-value="good">Golden ✓</div>
+        <div class="crema-btn" data-value="dark">Dark / Burnt</div>
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <div class="coach-setup">
+      <div class="coach-setup-header" onclick="toggleCoachSetup()">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div class="ai-dot" id="setupDot"></div>
+          <span class="section-label" style="margin:0;">Barista Coach <span style="color:#4a2e1e; font-weight:400; text-transform:none; letter-spacing:0;">— AI-powered</span></span>
+        </div>
+        <span class="coach-toggle-icon" id="coachToggleIcon">▸</span>
+      </div>
+      <div class="coach-setup-body" id="coachSetupBody">
+        <p class="coach-desc">After each pull, Barista Coach sends your shot data to Claude (Anthropic's AI) and streams back a personalized 3–5 sentence coaching note — specific grind numbers, what's causing the taste issue, and the single most important thing to fix next. It reads like advice from a knowledgeable friend, not a checklist.</p>
+        <p class="coach-cost">Cost: ~0.2¢ per pull ($0.002). Uses Claude Sonnet via the Anthropic API — you need your own key.</p>
+        <div class="key-row">
+          <input
+            type="password"
+            id="apiKeyInput"
+            placeholder="sk-ant-api03-…"
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button class="show-key-btn" onclick="toggleKeyVisibility()" id="showKeyBtn">Show</button>
+        </div>
+        <p class="coach-get-key">Get a key at <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a> → API Keys. Set a spend limit to protect yourself — $1 covers ~500 pulls.</p>
+      </div>
+    </div>
+
+    <button class="analyze-btn" onclick="analyze()">Dial It In →</button>
+
+    <div id="result"></div>
+  </div>
+
+  <script>
+    // Toggle selection for taste buttons
+    document.querySelectorAll('.taste-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.taste-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+      });
+    });
+
+    document.querySelectorAll('.crema-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.crema-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+      });
+    });
+
+    function getSelected(selector) {
+      const el = document.querySelector(selector + ' .selected');
+      return el ? el.dataset.value : null;
+    }
+
+    function analyze() {
+      const shotTime = parseInt(document.getElementById('shotTime').value);
+      const grindSize = parseInt(document.getElementById('grindSize').value);
+      const burrSetting = parseInt(document.getElementById('burrSetting').value);
+      const taste = getSelected('#tasteGrid');
+      const crema = getSelected('#cremaGrid');
+
+      if (!shotTime || shotTime < 5) {
+        alert('Please enter a valid shot time.');
+        return;
+      }
+      if (!taste) {
+        alert('Please select a taste profile.');
+        return;
+      }
+      if (!crema) {
+        alert('Please select a crema level.');
+        return;
+      }
+
+      const inputs = { shotTime, grindSize, burrSetting, taste, crema };
+      const recs = buildRecommendations(shotTime, grindSize, burrSetting, taste, crema);
+      renderResult(recs, inputs);
+    }
+
+    function buildRecommendations(time, grind, burr, taste, crema) {
+      const recs = [];
+
+      // ── Shot time analysis ──────────────────────────────────────────
+      const TARGET_LOW = 25;
+      const TARGET_HIGH = 30;
+      let timeStatus, timeScore;
+
+      if (time < 18) {
+        timeStatus = 'bad';
+        timeScore = 1;
+      } else if (time < TARGET_LOW) {
+        const diff = TARGET_LOW - time;
+        timeStatus = diff > 4 ? 'bad' : 'warning';
+        timeScore = diff > 4 ? 2 : 3;
+      } else if (time <= TARGET_HIGH) {
+        timeStatus = 'good';
+        timeScore = 5;
+      } else if (time <= 35) {
+        const diff = time - TARGET_HIGH;
+        timeStatus = diff > 3 ? 'bad' : 'warning';
+        timeScore = diff > 3 ? 3 : 4;
+      } else {
+        timeStatus = 'bad';
+        timeScore = 1;
+      }
+
+      // ── Taste / extraction analysis ─────────────────────────────────
+      const underExtracted = taste === 'sour' || taste === 'salty' || taste === 'weak';
+      const overExtracted = taste === 'bitter' || taste === 'harsh';
+      const balanced = taste === 'balanced';
+
+      const cremaGood = crema === 'good';
+      const cremaUnder = crema === 'none' || crema === 'thin';
+      const cremaOver = crema === 'dark';
+
+      // Overall extraction direction
+      let extractDir = 0; // -1 = need more, +1 = need less, 0 = ok
+      let extractScore = 5;
+
+      if (underExtracted) { extractDir = -1; extractScore = 2; }
+      else if (overExtracted) { extractDir = 1; extractScore = 2; }
+      if (cremaUnder && extractDir >= 0) { extractDir = -1; extractScore = Math.min(extractScore, 3); }
+      if (cremaOver && extractDir <= 0) { extractDir = 1; extractScore = Math.min(extractScore, 3); }
+
+      // ── Grind recommendation ────────────────────────────────────────
+      if (grind && burr) {
+        let grindRec = null;
+        let newGrind = grind;
+        let newBurr = burr;
+
+        const tooFast = time < TARGET_LOW;
+        const tooSlow = time > TARGET_HIGH;
+
+        // Determine grind adjustment from time + taste
+        let finerNeeded = 0; // positive = go finer (lower number), negative = go coarser
+
+        if (tooFast) finerNeeded += Math.ceil((TARGET_LOW - time) / 3);
+        if (tooSlow) finerNeeded -= Math.ceil((time - TARGET_HIGH) / 3);
+        if (underExtracted) finerNeeded += 1;
+        if (overExtracted) finerNeeded -= 1;
+
+        finerNeeded = Math.max(-4, Math.min(4, finerNeeded));
+
+        if (finerNeeded !== 0) {
+          newGrind = grind - finerNeeded; // lower number = finer on Breville
+          // Clamp grind to 1–16
+          if (newGrind < 1) {
+            const overflow = 1 - newGrind;
+            newGrind = 1;
+            // Suggest moving burr finer only if there's room
+            if (burr > 1) {
+              newBurr = Math.max(1, burr - Math.ceil(overflow / 2));
+            }
+          }
+          if (newGrind > 16) {
+            const overflow = newGrind - 16;
+            newGrind = 16;
+            if (burr < 5) {
+              newBurr = Math.min(5, burr + Math.ceil(overflow / 2));
+            }
+          }
+          newGrind = Math.max(1, Math.min(16, newGrind));
+
+          const direction = finerNeeded > 0 ? 'finer' : 'coarser';
+          const steps = Math.abs(finerNeeded);
+          let body = `Move your grind size from <strong>${grind} → ${newGrind}</strong>`;
+          if (newBurr !== burr) {
+            body += ` and adjust burr from <strong>${burr} → ${newBurr}</strong>`;
+          }
+          body += `. Going <strong>${direction}</strong> will ${direction === 'finer' ? 'slow the flow and increase extraction' : 'speed the flow and reduce extraction'}.`;
+
+          recs.push({ type: 'warning', title: 'Grind Adjustment', body });
+        } else {
+          recs.push({ type: 'good', title: 'Grind & Burr', body: `Your settings (grind <strong>${grind}</strong>, burr <strong>${burr}</strong>) look solid — no grind changes needed.` });
+        }
+      }
+
+      // ── Shot time card ──────────────────────────────────────────────
+      if (time >= TARGET_LOW && time <= TARGET_HIGH) {
+        recs.push({ type: 'good', title: 'Shot Time', body: `<strong>${time}s</strong> is right in the sweet spot (25–30s). Extraction window is dialed in.` });
+      } else if (time < TARGET_LOW) {
+        const gap = TARGET_LOW - time;
+        recs.push({ type: timeStatus, title: 'Shot Time — Too Fast', body: `<strong>${time}s</strong> is ${gap}s short of the 25–30s target. The water is rushing through — grind finer to slow it down and build more pressure.` });
+      } else {
+        const gap = time - TARGET_HIGH;
+        recs.push({ type: timeStatus, title: 'Shot Time — Too Slow', body: `<strong>${time}s</strong> is ${gap}s past the 25–30s target. The grind is too fine or there's too much resistance — go coarser to let the water flow faster.` });
+      }
+
+      // ── Taste card ──────────────────────────────────────────────────
+      const tasteMessages = {
+        sour: 'Sourness signals <strong>under-extraction</strong>. The water didn\'t dissolve enough of the good compounds. Grind finer, or try tamping with more even pressure.',
+        salty: 'Saltiness is an early sign of <strong>under-extraction</strong>. Grind finer and aim for a longer shot time.',
+        weak: 'A weak/watery taste means <strong>under-extraction</strong> or too coarse a grind. Grind finer and check your dose — you want 18–20g in for a double.',
+        balanced: 'Taste is <strong>balanced</strong> — that\'s the goal. Sweet, slightly fruity, with pleasant bitterness at the end.',
+        harsh: 'Harshness/astringency means <strong>over-extraction</strong>. The water pulled too much from the grounds. Grind coarser or reduce shot time.',
+        bitter: 'Strong bitterness signals <strong>over-extraction</strong>. Go coarser, or check that your dose isn\'t too light.',
+      };
+
+      const tasteType = balanced ? 'good' : (underExtracted ? 'bad' : 'bad');
+      recs.push({ type: tasteType, title: 'Taste', body: tasteMessages[taste] });
+
+      // ── Crema card ──────────────────────────────────────────────────
+      const cremaMessages = {
+        none: 'No crema usually means <strong>under-extraction</strong>, stale beans, or too coarse a grind. Check bean freshness (use within 2–4 weeks of roast date) and go finer.',
+        thin: 'Thin/pale crema points to <strong>under-extraction</strong>. Grind finer or check that your portafilter basket is clean and the machine is fully warmed up.',
+        good: 'Golden crema is exactly what you want — rich, hazelnut colored, and thick enough to last a minute.',
+        dark: 'Dark or burnt crema is a sign of <strong>over-extraction</strong>. Go slightly coarser and make sure your water temperature isn\'t too high.',
+      };
+
+      const cremaType = cremaGood ? 'good' : (cremaOver ? 'bad' : 'warning');
+      recs.push({ type: cremaType, title: 'Crema', body: cremaMessages[crema] });
+
+      // ── Score ───────────────────────────────────────────────────────
+      const score = Math.round((timeScore + extractScore) / 2);
+      const verdicts = {
+        1: { title: 'Needs significant work', sub: 'Multiple things to adjust — start with grind.' },
+        2: { title: 'Under/over-extracted', sub: 'A few clear changes will get you close.' },
+        3: { title: 'Getting there', sub: 'You\'re in the right ballpark — fine-tune.' },
+        4: { title: 'Almost dialed in', sub: 'Small tweak and you\'ll nail it.' },
+        5: { title: 'Dialed in', sub: 'This is a great shot. Note these settings!' },
+      };
+
+      return { recs, score, verdict: verdicts[score] || verdicts[3] };
+    }
+
+    function renderResult({ recs, score, verdict }, inputs) {
+      const el = document.getElementById('result');
+
+      const recHTML = recs.map(r => `
+        <div class="rec-card ${r.type}">
+          <div class="rec-title">${r.title}</div>
+          <div class="rec-body">${r.body}</div>
+        </div>
+      `).join('');
+
+      el.innerHTML = `
+        <div class="result-header">
+          <div class="score-badge">
+            <span class="score-num">${score}/5</span>
+            <span class="score-label">score</span>
+          </div>
+          <div class="verdict">
+            <div class="verdict-title">${verdict.title}</div>
+            <div class="verdict-sub">${verdict.sub}</div>
+          </div>
+        </div>
+        <div class="recommendations">${recHTML}</div>
+        <div class="target-info">
+          <strong>Target parameters (double shot):</strong><br />
+          Dose: 18–20g in · Yield: 36g out · Time: 25–30s · Ratio: ~1:2<br />
+          Breville tip: make one grind change at a time, then pull again before adjusting more.
+        </div>
+        <div class="ai-coaching" id="aiCoaching">
+          <div class="ai-coaching-header">
+            <div class="ai-dot pulsing" id="aiDot"></div>
+            <div class="ai-coaching-label">Barista Coach</div>
+          </div>
+          <div class="ai-coaching-body" id="aiCoachingBody">
+            <span class="ai-thinking">Analyzing your pull…</span>
+          </div>
+        </div>
+      `;
+
+      el.style.display = 'block';
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+      fetchAICoaching(inputs);
+    }
+
+    function toggleCoachSetup() {
+      const body = document.getElementById('coachSetupBody');
+      const icon = document.getElementById('coachToggleIcon');
+      const dot = document.getElementById('setupDot');
+      const isOpen = body.classList.toggle('open');
+      icon.style.transform = isOpen ? 'rotate(90deg)' : '';
+      dot.classList.toggle('pulsing', isOpen);
+    }
+
+    function toggleKeyVisibility() {
+      const input = document.getElementById('apiKeyInput');
+      const btn = document.getElementById('showKeyBtn');
+      const isPassword = input.type === 'password';
+      input.type = isPassword ? 'text' : 'password';
+      btn.textContent = isPassword ? 'Hide' : 'Show';
+    }
+
+    async function fetchAICoaching(inputs) {
+      const bodyEl = document.getElementById('aiCoachingBody');
+      const dotEl = document.getElementById('aiDot');
+      const apiKey = document.getElementById('apiKeyInput').value.trim();
+
+      if (!apiKey) {
+        bodyEl.innerHTML = '<span class="ai-thinking">Add your Anthropic API key in the Barista Coach section above to enable AI coaching.</span>';
+        dotEl.classList.remove('pulsing');
+        return;
+      }
+
+      const { shotTime, grindSize, burrSetting, taste, crema } = inputs;
+
+      const prompt = `You are a knowledgeable espresso coach. A home barista just pulled a shot on their Breville machine and needs specific, actionable advice.
+
+Shot details:
+- Shot time: ${shotTime}s (target is 25–30s for a double)
+- Grind size: ${grindSize !== null ? grindSize + ' (scale 1–16, lower = finer)' : 'not provided'}
+- Burr setting: ${burrSetting !== null ? burrSetting + ' (scale 1–5, lower = finer)' : 'not provided'}
+- Taste: ${taste}
+- Crema: ${crema}
+
+Give a brief (3–5 sentence), conversational coaching note. Be specific with numbers where relevant. Lead with the single most important adjustment. Don't use bullet points — write it as one flowing paragraph like a knowledgeable friend talking them through it. Don't start with "Great" or sycophantic openers.`;
+
+      try {
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': apiKey,
+            'anthropic-version': '2023-06-01',
+            'anthropic-dangerous-direct-browser-access': 'true',
+          },
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-20250514',
+            max_tokens: 1000,
+            stream: true,
+            messages: [{ role: 'user', content: prompt }]
+          })
+        });
+
+        if (!response.ok) throw new Error('API error');
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let fullText = '';
+        bodyEl.innerHTML = '<span class="cursor-blink"></span>';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value);
+          const lines = chunk.split('\n').filter(l => l.startsWith('data: '));
+
+          for (const line of lines) {
+            const data = line.slice(6);
+            if (data === '[DONE]') continue;
+            try {
+              const parsed = JSON.parse(data);
+              if (parsed.type === 'content_block_delta' && parsed.delta?.text) {
+                fullText += parsed.delta.text;
+                bodyEl.innerHTML = fullText + '<span class="cursor-blink"></span>';
+              }
+            } catch {}
+          }
+        }
+
+        bodyEl.innerHTML = fullText;
+        dotEl.classList.remove('pulsing');
+
+      } catch (err) {
+        bodyEl.innerHTML = '<span class="ai-thinking">Coaching unavailable — check your connection and try again.</span>';
+        dotEl.classList.remove('pulsing');
+      }
+    }
+  </script>
+</body>
+</html>
